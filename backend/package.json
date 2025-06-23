@@ -1,0 +1,31 @@
+{
+  "name": "backend_for_mesto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/app.ts",
+    "lint": "npx eslint src/**/*.ts",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+  },
+  "keywords": [],
+  "author": "Sayd-Ali",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}
