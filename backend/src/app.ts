@@ -9,7 +9,6 @@ const app = express();
 app.use(express.json());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  // @ts-ignore
   req.user = { _id: '6859869863dbe10c07f191f1' };
   next();
 });
@@ -17,6 +16,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
+
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
+});
 
 mongoose.connect(MONGO_URL)
   .then(() => {

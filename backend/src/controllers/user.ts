@@ -38,7 +38,6 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const updateProfile = (req: Request, res: Response, next: NextFunction) => {
   const { name, about } = req.body;
-  // @ts-ignore
   const userId = req.user._id;
 
   User.findByIdAndUpdate(
@@ -58,7 +57,6 @@ export const updateProfile = (req: Request, res: Response, next: NextFunction) =
 
 export const updateAvatar = (req: Request, res: Response, next: NextFunction) => {
   const { avatar } = req.body;
-  // @ts-ignore
   const userId = req.user._id;
 
   User.findByIdAndUpdate(

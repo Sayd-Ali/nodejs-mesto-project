@@ -5,7 +5,6 @@ import NotFoundError from '../errors/notFoundError';
 
 export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
-  // @ts-ignore
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
@@ -40,7 +39,6 @@ export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
-  // @ts-ignore
   const userId = req.user._id;
 
   Card.findByIdAndUpdate(
@@ -60,7 +58,6 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const unlikeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
-  // @ts-ignore
   const userId = req.user._id;
 
   Card.findByIdAndUpdate(
