@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import Card from '../models/card';
 import BadRequestError from '../errors/badRequest';
 import NotFoundError from '../errors/notFoundError';
-import ForbiddenError from '../errors/ForbiddenError';
+import HTTP_STATUS from '../constants/httpStatus';
 
 export const createCard = (
   req: Request,
@@ -14,7 +14,7 @@ export const createCard = (
 
   Card.create({ name, link, owner })
     .then((card) => {
-      res.status(201).send({ data: card });
+      res.status(HTTP_STATUS.CREATED).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -32,7 +32,7 @@ export const getCards = (
 ): void => {
   Card.find({})
     .then((cards) => {
-      res.send({ data: cards });
+      res.status(HTTP_STATUS.OK).send({ data: cards });
     })
     .catch((err) => {
       next(err);
@@ -43,22 +43,17 @@ export const deleteCard = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> => {
+) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
   try {
-    const card = await Card.findById(cardId).orFail(
-      () => new NotFoundError('Карточка не найдена'),
-    );
-
-    if (card.owner.toString() !== userId) {
-      next(new ForbiddenError('Нельзя удалять карточки других пользователей'));
+    const card = await Card.findOneAndDelete({ _id: cardId, owner: userId });
+    if (!card) {
+      next(new NotFoundError('Карточка не найдена или удалена ранее'));
       return;
     }
-
-    await card.deleteOne();
-    res.send({ data: card });
+    res.status(HTTP_STATUS.OK).send({ data: card });
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Неверный формат _id карточки'));
@@ -83,7 +78,7 @@ export const likeCard = (
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      res.send({ data: card });
+      res.status(HTTP_STATUS.OK).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -109,7 +104,7 @@ export const unlikeCard = (
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      res.send({ data: card });
+      res.status(HTTP_STATUS.OK).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {

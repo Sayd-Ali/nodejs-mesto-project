@@ -7,6 +7,7 @@ import NotFoundError from '../errors/notFoundError';
 import ConflictError from '../errors/ConflictError';
 import UnauthorizedError from '../errors/UnauthorizedError';
 import { JWT_SECRET } from '../config';
+import HTTP_STATUS from '../constants/httpStatus';
 
 export const getCurrentUser = async (
   req: Request,
@@ -22,7 +23,7 @@ export const getCurrentUser = async (
       return;
     }
 
-    res.send({ data: user });
+    res.status(HTTP_STATUS.OK).send({ data: user });
   } catch (err) {
     next(err);
   }
@@ -54,6 +55,7 @@ export const login = async (
     );
 
     res
+      .status(HTTP_STATUS.OK)
       .cookie('jwt', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -66,20 +68,6 @@ export const login = async (
   }
 };
 
-export const getUsers = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
-  User.find({})
-    .then((users) => {
-      res.send({ data: users });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
 export const getUserById = (
   req: Request,
   res: Response,
@@ -90,7 +78,7 @@ export const getUserById = (
   User.findById(userId)
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.send({ data: user });
+      res.status(HTTP_STATUS.OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -123,7 +111,7 @@ export const createUser = async (
       email,
       password: hashedPassword,
     });
-    res.status(201).send({ data: user });
+    res.status(HTTP_STATUS.CREATED).send({ data: user });
   } catch (err: any) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
@@ -151,7 +139,7 @@ export const updateProfile = (
   )
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.send({ data: user });
+      res.status(HTTP_STATUS.OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
@@ -177,7 +165,7 @@ export const updateAvatar = (
   )
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.send({ data: user });
+      res.status(HTTP_STATUS.OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
