@@ -2,42 +2,79 @@ import { Request, Response, NextFunction } from 'express';
 import Card from '../models/card';
 import BadRequestError from '../errors/badRequest';
 import NotFoundError from '../errors/notFoundError';
+import ForbiddenError from '../errors/ForbiddenError';
 
-export const createCard = (req: Request, res: Response, next: NextFunction) => {
+export const createCard = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send({ data: card }))
+    .then((card) => {
+      res.status(201).send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 };
 
-export const getCards = (req: Request, res: Response, next: NextFunction) => {
+export const getCards = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch(next);
+    .then((cards) => {
+      res.send({ data: cards });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
-export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
+export const deleteCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userId = req.user._id;
   const { cardId } = req.params;
 
-  Card.findByIdAndDelete(cardId)
-    .orFail(() => new NotFoundError('Карточка не найдена'))
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Передан некорректный _id карточки.'));
-      }
-      return next(err);
-    });
+  try {
+    const card = await Card.findById(cardId).orFail(
+      () => new NotFoundError('Карточка не найдена'),
+    );
+
+    if (card.owner.toString() !== userId) {
+      next(new ForbiddenError('Нельзя удалять карточки других пользователей'));
+      return;
+    }
+
+    await card.deleteOne();
+    res.send({ data: card });
+    return;
+  } catch (err: any) {
+    if (err.name === 'CastError') {
+      next(new BadRequestError('Неверный формат _id карточки'));
+      return;
+    }
+    next(err);
+    return;
+  }
 };
 
-export const likeCard = (req: Request, res: Response, next: NextFunction) => {
+export const likeCard = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
@@ -47,16 +84,23 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
     { new: true },
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      res.send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new BadRequestError('Передан некорректный _id карточки.'));
+        next(new BadRequestError('Передан некорректный _id карточки.'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 };
 
-export const unlikeCard = (req: Request, res: Response, next: NextFunction) => {
+export const unlikeCard = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
@@ -66,11 +110,15 @@ export const unlikeCard = (req: Request, res: Response, next: NextFunction) => {
     { new: true },
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      res.send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new BadRequestError('Передан некорректный _id карточки.'));
+        next(new BadRequestError('Передан некорректный _id карточки.'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 };
+

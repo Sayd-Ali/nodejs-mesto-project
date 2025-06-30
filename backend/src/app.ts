@@ -1,25 +1,33 @@
-import express, {Request, Response, NextFunction} from 'express';
+import { PORT, MONGO_URL } from './config';
+import { errors as celebrateErrors } from 'celebrate';
+import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/user';
 import cardRouter from './routes/card';
-
-const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
+import { login, createUser } from './controllers/user';
+import { requestLogger, errorLogger } from './middlewares/logger';
+import errorHandler from './errors/default';
+import auth from './middlewares/auth';
+import { validateLogin, validateCreateUser } from './middlewares/celebrateValidators';
 
 const app = express();
 app.use(express.json());
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = { _id: '6859869863dbe10c07f191f1' };
-  next();
-});
+app.post('/signin', validateLogin, login);
+app.post('/signup', validateCreateUser, createUser);
 
+app.use(auth);
+
+app.use(requestLogger);
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
-app.use((req: Request, res: Response) => {
-  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
-});
+app.use(errorLogger);
+
+app.use(celebrateErrors());
+
+app.use(errorHandler);
 
 mongoose.connect(MONGO_URL)
   .then(() => {
