@@ -23,10 +23,8 @@ export const getCurrentUser = async (
     }
 
     res.send({ data: user });
-    return;
   } catch (err) {
     next(err);
-    return;
   }
 };
 
@@ -63,10 +61,8 @@ export const login = async (
         secure: process.env.NODE_ENV === 'production',
       })
       .send({ message: 'Авторизация успешна' });
-    return;
   } catch (err) {
     next(err);
-    return;
   }
 };
 
@@ -128,19 +124,15 @@ export const createUser = async (
       password: hashedPassword,
     });
     res.status(201).send({ data: user });
-    return;
   } catch (err: any) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
-      return;
     }
     if (err.code === 11000) {
       next(new ConflictError('Пользователь с таким email уже существует.'));
-      return;
     }
 
     next(err);
-    return;
   }
 };
 

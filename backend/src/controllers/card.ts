@@ -59,14 +59,12 @@ export const deleteCard = async (
 
     await card.deleteOne();
     res.send({ data: card });
-    return;
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Неверный формат _id карточки'));
       return;
     }
     next(err);
-    return;
   }
 };
 
@@ -121,4 +119,3 @@ export const unlikeCard = (
       next(err);
     });
 };
-
