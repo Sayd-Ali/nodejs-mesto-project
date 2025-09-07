@@ -33,9 +33,9 @@ module.exports = {
       // в каталоге релиза
       'post-deploy': [
         'cd backend && npm ci && npm run build',
-        'pm2 startOrReload backend/ecosystem.config.js --env production',
-        'pm2 save'
-      ].join(' && '),
+        'export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; pm2 startOrReload backend/ecosystem.config.js --env production',
+        'export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; pm2 save'
+      ].join(' && ')
     },
   },
 };
