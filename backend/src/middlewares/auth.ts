@@ -8,13 +8,20 @@ interface TokenPayload extends JwtPayload {
 }
 
 export default function auth(req: Request, res: Response, next: NextFunction) {
-  const { authorization } = req.headers;
+  // Пропускаем preflight-запросы
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  const { authorization } = req.headers;
+  const tokenFromCookie = req.cookies?.jwt;
+
+  // Проверяем заголовок или куку
+  if ((!authorization || !authorization.startsWith('Bearer ')) && !tokenFromCookie) {
     return next(new UnauthorizedError('Необходима авторизация'));
   }
 
-  const token = authorization.replace('Bearer ', '');
+  const token = tokenFromCookie || authorization!.replace('Bearer ', '');
   let payload: TokenPayload;
 
   try {
@@ -24,7 +31,11 @@ export default function auth(req: Request, res: Response, next: NextFunction) {
       throw new UnauthorizedError('Неверный токен');
     }
 
-    payload = { _id: (decoded as any)._id, iat: decoded.iat, exp: decoded.exp };
+    payload = {
+      _id: (decoded as any)._id,
+      iat: (decoded as any).iat,
+      exp: (decoded as any).exp,
+    };
   } catch (err) {
     return next(new UnauthorizedError('Необходима авторизация'));
   }
