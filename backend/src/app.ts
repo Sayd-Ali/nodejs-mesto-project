@@ -10,21 +10,23 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
-// доверять proxy (чтобы корректно работали secure cookies)
+// доверять proxy (чтобы корректно работали secure cookies за nginx)
 app.set('trust proxy', 1);
 
+// --- CORS (разрешаем фронту ходить на API с куками) ---
 const corsOpts = {
   origin: 'https://mymesto.student.nomorepartiessbs.ru',
   credentials: true,
 };
 app.use(cors(corsOpts));
+app.options('*', cors(corsOpts)); // preflight через cors
 
-app.options('*', cors(corsOpts));
-
-app.use((req, res, next) => {
+// ⚠️ Шорткат: съедаем OPTIONS до роутов, чтобы не попало в auth
+const preflight = (req: any, res: any, next: any) => {
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
-});
+};
+app.use(preflight);
 
 // JSON + cookies
 app.use(express.json());
@@ -33,7 +35,7 @@ app.use(cookieParser());
 // Логгер запросов
 app.use(requestLogger);
 
-// Основные роуты
+// Роуты (внутри router публичные /signin и /signup должны идти ДО router.use(auth))
 app.use(router);
 
 // Логгер ошибок
