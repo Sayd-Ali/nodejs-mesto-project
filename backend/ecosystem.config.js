@@ -1,12 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.deploy') });
 
-const {
-  DEPLOY_USER,
-  DEPLOY_HOST,
-  DEPLOY_PATH,
-  DEPLOY_REF = 'origin/main',
-} = process.env;
+const { DEPLOY_USER, DEPLOY_HOST, DEPLOY_PATH, DEPLOY_REF = 'origin/main' } = process.env;
 
 module.exports = {
   apps: [
@@ -29,12 +24,11 @@ module.exports = {
       path: DEPLOY_PATH,
 
       // создаём shared (на сервере)
-      'pre-deploy': 'mkdir -p $PM2_DEPLOY_PATH/shared',
+      'pre-deploy': `mkdir -p ${DEPLOY_PATH}/shared`,
 
       // ЛОКАЛЬНО: копируем твой backend/.env на сервер в shared/.env
-      'pre-deploy-local':
-        'scp backend/.env ' +
-        DEPLOY_USER + '@' + DEPLOY_HOST + ':' + DEPLOY_PATH + '/shared/.env',
+      'pre-deploy-local': `scp backend/.env ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/shared/.env`,
+
 
       // в каталоге релиза
       'post-deploy': [
