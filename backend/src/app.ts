@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import router from './routes';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import errorHandler from './errors/default';
+import cors from 'cors';
 
 const app = express();
 
