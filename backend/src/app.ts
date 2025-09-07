@@ -7,6 +7,15 @@ import { requestLogger, errorLogger } from './middlewares/logger';
 import errorHandler from './errors/default';
 
 const app = express();
+
+app.set('trust proxy', 1);
+
+const corsOpts = {
+  origin: 'https://mymesto.student.nomorepartiessbs.ru',
+  credentials: true,
+};
+app.use(cors(corsOpts));
+
 app.use(express.json());
 
 app.use(requestLogger);
