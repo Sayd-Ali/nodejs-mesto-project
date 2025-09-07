@@ -62,7 +62,7 @@ export const login = async (
         sameSite: 'none',
         secure: process.env.NODE_ENV === 'production',
       })
-      .send({ message: 'Авторизация успешна' });
+      .send({ token })
   } catch (err) {
     next(err);
   }
