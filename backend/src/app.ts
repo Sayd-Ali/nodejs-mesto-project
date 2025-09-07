@@ -1,5 +1,7 @@
 // src/app.ts
-import express, { type Request, type Response, type NextFunction } from 'express';
+import express, {
+  type RequestHandler,
+} from 'express';
 import mongoose from 'mongoose';
 import { errors as celebrateErrors } from 'celebrate';
 
@@ -36,10 +38,10 @@ app.use(cookieParser());
 // логирование запросов
 app.use(requestLogger);
 
-// Жёсткий шорткат для preflight (чтобы не попасть в auth внутри роутера)
-app.use('*', (req: Request, res: Response, next: NextFunction) => {
+// Шорткат для preflight, чтобы не попасть в auth внутри роутера
+const preflightHandler: RequestHandler = (req, res, next) => {
   if (req.method === 'OPTIONS') {
-    // дублируем CORS-заголовки на случай, если какой-то прокси их "теряет"
+    // на всякий случай дублируем CORS-заголовки
     res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
@@ -47,16 +49,17 @@ app.use('*', (req: Request, res: Response, next: NextFunction) => {
     return res.sendStatus(204);
   }
   return next();
-});
+};
+app.use(preflightHandler);
 
 // ---------- Роутер ----------
-// ВАЖНО: в самом router публичные /signup и /signin должны быть ДО router.use(auth)
+// ВАЖНО: в самом router публичные /signup и /signin объяви ДО router.use(auth)
 app.use(router);
 
 // логирование ошибок
 app.use(errorLogger);
 
-// celebrate и общий обработчик
+// обработчики ошибок
 app.use(celebrateErrors());
 app.use(errorHandler);
 
