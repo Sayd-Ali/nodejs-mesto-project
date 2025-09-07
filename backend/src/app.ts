@@ -13,11 +13,18 @@ const app = express();
 // доверять proxy (чтобы корректно работали secure cookies)
 app.set('trust proxy', 1);
 
-// Разрешаем фронту ходить на API
-app.use(cors({
+const corsOpts = {
   origin: 'https://mymesto.student.nomorepartiessbs.ru',
-  credentials: true, // обязательно для куки
-}));
+  credentials: true,
+};
+app.use(cors(corsOpts));
+
+app.options('*', cors(corsOpts));
+
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 // JSON + cookies
 app.use(express.json());
