@@ -8,28 +8,27 @@ interface TokenPayload extends JwtPayload {
 }
 
 export default function auth(req: Request, res: Response, next: NextFunction) {
-  // Пропускаем preflight без проверки
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
-
   const { authorization } = req.headers;
-  const tokenFromCookie = req.cookies?.jwt;
 
-  if ((!authorization || !authorization.startsWith('Bearer ')) && !tokenFromCookie) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     return next(new UnauthorizedError('Необходима авторизация'));
   }
 
-  const token = tokenFromCookie || authorization!.replace('Bearer ', '');
+  const token = authorization.replace('Bearer ', '');
+  let payload: TokenPayload;
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    if (!decoded || typeof decoded !== 'object' || !decoded._id) {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload | string;
+
+    if (typeof decoded !== 'object' || decoded === null || !('_id' in decoded)) {
       throw new UnauthorizedError('Неверный токен');
     }
-    req.user = { _id: decoded._id as string };
-    return next();
+
+    payload = { _id: (decoded as any)._id, iat: decoded.iat, exp: decoded.exp };
   } catch (err) {
     return next(new UnauthorizedError('Необходима авторизация'));
   }
+
+  req.user = { _id: payload._id };
+  return next();
 }
