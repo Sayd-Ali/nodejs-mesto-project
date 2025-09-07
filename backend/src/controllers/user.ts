@@ -56,13 +56,7 @@ export const login = async (
 
     res
       .status(HTTP_STATUS.OK)
-      .cookie('jwt', token, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'none',
-        secure: process.env.NODE_ENV === 'production',
-      })
-      .send({ token })
+      .send({ token });
   } catch (err) {
     next(err);
   }

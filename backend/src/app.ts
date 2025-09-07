@@ -8,15 +8,9 @@ import errorHandler from './errors/default';
 import cors from 'cors';
 
 const app = express();
-
-app.set('trust proxy', 1);
-
-const corsOpts = {
+app.use(cors({
   origin: 'https://mymesto.student.nomorepartiessbs.ru',
-  credentials: true,
-};
-app.use(cors(corsOpts));
-
+}));
 app.use(express.json());
 
 app.use(requestLogger);
