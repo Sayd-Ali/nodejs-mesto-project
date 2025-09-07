@@ -1,4 +1,5 @@
-import express from 'express';
+// src/app.ts
+import express, { type Request, type Response, type NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { errors as celebrateErrors } from 'celebrate';
 
@@ -7,13 +8,15 @@ import router from './routes';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import errorHandler from './errors/default';
 
-import cors, { CorsOptions } from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 
 const app = express();
 
+// если стоим за nginx — нужно для корректной работы secure-кук
 app.set('trust proxy', 1);
 
+// ---------- CORS & cookies (ДО роутов) ----------
 const allowedOrigins = ['https://mymesto.student.nomorepartiessbs.ru'];
 
 const corsOptions: CorsOptions = {
@@ -24,28 +27,40 @@ const corsOptions: CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-
+// ответ на preflight через cors
 app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
 
+// логирование запросов
 app.use(requestLogger);
 
-app.use((req, res, next) => {
+// Жёсткий шорткат для preflight (чтобы не попасть в auth внутри роутера)
+app.use('*', (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
+    // дублируем CORS-заголовки на случай, если какой-то прокси их "теряет"
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.sendStatus(204);
   }
   return next();
 });
 
+// ---------- Роутер ----------
+// ВАЖНО: в самом router публичные /signup и /signin должны быть ДО router.use(auth)
 app.use(router);
 
+// логирование ошибок
 app.use(errorLogger);
 
+// celebrate и общий обработчик
 app.use(celebrateErrors());
 app.use(errorHandler);
 
+// ---------- Старт ----------
 mongoose
   .connect(MONGO_URL)
   .then(() => {
