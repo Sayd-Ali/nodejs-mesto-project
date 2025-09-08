@@ -14,7 +14,7 @@ export const createCard = (
 
   Card.create({ name, link, owner })
     .then((card) => {
-      res.status(HTTP_STATUS.CREATED).send({ data: card });
+      res.status(HTTP_STATUS.CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -32,7 +32,7 @@ export const getCards = (
 ): void => {
   Card.find({})
     .then((cards) => {
-      res.status(HTTP_STATUS.OK).send({ data: cards });
+      res.status(HTTP_STATUS.OK).send(cards);
     })
     .catch((err) => {
       next(err);
@@ -53,7 +53,7 @@ export const deleteCard = async (
       next(new NotFoundError('Карточка не найдена или удалена ранее'));
       return;
     }
-    res.status(HTTP_STATUS.OK).send({ data: card });
+    res.status(HTTP_STATUS.OK).send(card);
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Неверный формат _id карточки'));
@@ -78,7 +78,7 @@ export const likeCard = (
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      res.status(HTTP_STATUS.OK).send({ data: card });
+      res.status(HTTP_STATUS.OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -104,7 +104,7 @@ export const unlikeCard = (
   )
     .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      res.status(HTTP_STATUS.OK).send({ data: card });
+      res.status(HTTP_STATUS.OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {

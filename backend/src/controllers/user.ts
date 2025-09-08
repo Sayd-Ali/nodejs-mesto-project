@@ -23,7 +23,7 @@ export const getCurrentUser = async (
       return;
     }
 
-    res.status(HTTP_STATUS.OK).send({ data: user });
+    res.status(HTTP_STATUS.OK).send(user);
   } catch (err) {
     next(err);
   }
@@ -72,7 +72,7 @@ export const getUserById = (
   User.findById(userId)
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.status(HTTP_STATUS.OK).send({ data: user });
+      res.status(HTTP_STATUS.OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -105,7 +105,7 @@ export const createUser = async (
       email,
       password: hashedPassword,
     });
-    res.status(HTTP_STATUS.CREATED).send({ data: user });
+    res.status(HTTP_STATUS.CREATED).send(user);
   } catch (err: any) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
@@ -133,7 +133,7 @@ export const updateProfile = (
   )
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.status(HTTP_STATUS.OK).send({ data: user });
+      res.status(HTTP_STATUS.OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
@@ -159,7 +159,7 @@ export const updateAvatar = (
   )
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      res.status(HTTP_STATUS.OK).send({ data: user });
+      res.status(HTTP_STATUS.OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
