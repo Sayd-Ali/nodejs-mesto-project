@@ -11,6 +11,7 @@ const app = express();
 
 const allowedOrigins = [
   'https://mymesto.student.nomorepartiessbs.ru',
+  'http://mymesto.student.nomorepartiessbs.ru',
   'http://localhost:3000',
   'http://localhost:3001',
 ];
