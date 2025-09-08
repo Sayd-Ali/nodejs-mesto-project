@@ -1,0 +1,27 @@
+{
+  "apps": [
+    {
+      "name": "mesto-api",
+      "cwd": "backend",
+      "script": "./dist/app.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "3000"
+      }
+    }
+  ],
+  "deploy": {
+    "production": {
+      "user": "ENV:DEPLOY_USER",
+      "host": ["ENV:DEPLOY_HOST"],
+      "ref": "ENV:DEPLOY_REF",
+      "repo": "ENV:REPO_URL",
+      "path": "ENV:DEPLOY_PATH",
+      "pre-deploy": "mkdir -p $PM2_DEPLOY_PATH/shared",
+      "pre-deploy-local": "scp backend/.env ${DEPLOY_USER}@${DEPLOY_HOST}:$PM2_DEPLOY_PATH/shared/.env",
+      "post-deploy": "cd $PM2_DEPLOY_PATH/current/backend && npm ci && npm run build && ln -sf $PM2_DEPLOY_PATH/shared/.env .env && pm2 startOrReload ecosystem.config.json --env production && pm2 save"
+    }
+  }
+}
