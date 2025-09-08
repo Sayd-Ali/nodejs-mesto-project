@@ -8,9 +8,21 @@ import errorHandler from './errors/default';
 import cors from 'cors';
 
 const app = express();
-app.use(cors({
-  origin: 'https://mymesto.student.nomorepartiessbs.ru',
-}));
+
+const allowedOrigins = [
+  'https://mymesto.student.nomorepartiessbs.ru',
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
+
+const corsOpts: cors.CorsOptions = {
+  origin: allowedOrigins,
+  methods: ['GET','POST','PATCH','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+};
+
+app.use(cors(corsOpts));
+
 app.use(express.json());
 
 app.use(requestLogger);
